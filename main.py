@@ -32,22 +32,20 @@ async def ping(interaction: discord.Interaction, message: str):
 
 
 @tree.command(name='setup', description='Setup the bot by selecting what channel you want it to talk in, and the '
-                                        'temperature (randomness) of the AI.')
+                                        'temperature of the AI.')
 async def setup(interaction: discord.Interaction, channel: str, temperature: int):
     await interaction.response.send_message(f'Bot will now talk in {channel} with a temperature of {temperature}')
 
+    chan = channel
+    temp = temperature
 
-@bot.command()
-async def ping(ctx):
-    await ctx.send('pong')
-
+@tree.command(name='help', description='Help command')
+async def help(interaction: discord.Interaction):
+    await interaction.response.send_message(f'Commands: /ping <message>, /setup <channel> <temperature>, /help')
 
 # bot checks for message
 @bot.event
-async def on_message(message):
-    global temperature
-    global channel
-
+async def on_message(message, temp, chan):
     prompt = message.content
 
     if message.author == bot.user:
@@ -57,14 +55,14 @@ async def on_message(message):
         return
     if message.content.startswith('!'):
         return
-    if message.channel.name == channel:
+    if message.channel.name == chan:
 
         # prompts the ai to generate a response
         completion = openai.Completion.create(
             model="text-davinci-003",
             prompt=prompt,
             max_tokens=50,
-            temperature=temperature,
+            temperature=temp,
         )
 
         # sends the response to the channel
