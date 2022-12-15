@@ -24,8 +24,16 @@ tree = bot.tree
 
 # define your commands using the @tree.command decorator
 @tree.command(name='ping', description='Pong!')
-async def ping(interaction: discord.Interaction):
-    await interaction.response.send_message('Pong!')
+async def ping(interaction: discord.Interaction, message:str):
+    await interaction.response.send_message(f'Pong! {message}')
+    print(message)
+
+@tree.command(name='setup', description='Setup the bot by selecting what channel(s) you want it to talk in!')
+async def setup(interaction: discord.Interaction, channel: discord.TextChannel):
+    await interaction.response.send_message(f'Bot will now talk in {channel.mention}')
+    print(channel)
+
+
 
 @bot.command()
 async def ping(ctx):
