@@ -15,11 +15,7 @@ openai.api_key = os.getenv('KEY')
 # discord setup
 bot = commands.Bot(command_prefix='./', intents=discord.Intents.all(), help_command=None)
 
-# remove the existing command tree from the bot instance
-bot.command_tree = None
-
-# create the CommandTree object for the bot
-tree = app_commands.CommandTree(bot)
+tree = bot.tree
 
 # define your commands using the @tree.command decorator
 @tree.command(name='ping', description='Pong!')
