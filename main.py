@@ -15,6 +15,11 @@ openai.api_key = os.getenv('KEY')
 # discord setup
 bot = commands.Bot(command_prefix='./', intents=discord.Intents.all(), help_command=None)
 
+@bot.event
+async def on_ready():
+  await tree.sync()
+  print('Bot is ready')
+
 tree = bot.tree
 
 # define your commands using the @tree.command decorator
@@ -22,17 +27,14 @@ tree = bot.tree
 async def ping(interaction: discord.Interaction):
     await interaction.response.send_message('Pong!')
 
-@bot.event
-async def on_ready():
-  await tree.sync()
-  print('Bot is ready')
+@bot.command()
+async def ping(ctx):
+    await ctx.send('pong')
 
 # bot checks for message
 @bot.event
 async def on_message(message):
     if message.author == bot.user:
-        return
-    if message.content.startswith('./'):
         return
     prompt = message.content
 
@@ -45,6 +47,7 @@ async def on_message(message):
 
     # sends the response to the channel
     await message.channel.send(completion.choices[0].text)
+    await bot.process_commands(message)
 
 # run bot
 bot.run(os.getenv('TOKEN'))
