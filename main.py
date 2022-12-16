@@ -9,7 +9,7 @@ from discord import app_commands
 load_dotenv()
 
 # openai setup
-openai.organization = 'org-y8b1gmfkEMElgOyjjRG1s5PX'
+openai.organization = os.getenv('ORG')
 openai.api_key = os.getenv('KEY')
 
 # discord setup
