@@ -43,6 +43,10 @@ async def setup(interaction: discord.Interaction, channel: discord.TextChannel, 
     bot.chan = channel.id
     bot.temp = temperature
 
+else:
+    async def setup(interaction: discord.Interaction):
+        await interaction.response.send_message('You do not have permission to use this command')
+
 
 @tree.command(name='help', description='Help command')
 async def help(interaction: discord.Interaction):
@@ -53,17 +57,12 @@ async def help(interaction: discord.Interaction):
 async def on_message(message):
     prompt = message.content
 
-    print(bot.chan)
-    print(bot.temp)
-
     if message.author == bot.user:
-        return
-    if message.content.startswith('./'):
-        await bot.process_commands(message)
         return
     if message.content.startswith('!'):
         return
-    if message.channel.name != bot.chan:
+    if message.channel.id != bot.chan:
+        print('Not correct channel')
         return
 
     # prompts the ai to generate a response
@@ -77,6 +76,7 @@ async def on_message(message):
     # sends the response to the channel
     await message.channel.send(completion.choices[0].text)
     await bot.process_commands(message)
+    print(completion)
 
 
 # run bot
