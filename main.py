@@ -6,58 +6,58 @@ from discord.ext import commands
 from dotenv import load_dotenv
 from discord import app_commands
 
+# load environment variables from .env file
 load_dotenv()
 
-# openai setup
+# set OpenAI organization and API key from environment variables
 openai.organization = os.getenv('ORG')
 openai.api_key = os.getenv('KEY')
 
-# discord setup
+# initialize Discord bot with command prefix, intents, and help command
 bot = commands.Bot(command_prefix='./', intents=discord.Intents.all(), help_command=None)
 
-# variable setup
+# initialize bot variables for Discord channel and temperature
 bot.chan = 'str'
 bot.temp = 0.5
 
-
+# event handler for when the bot is ready
 @bot.event
 async def on_ready():
+    # sync bot
     await tree.sync()
     print('Bot is ready')
 
-
+# create command tree for the bot
 tree = bot.tree
 
-
-# define your commands using the @tree.command decorator
-@tree.command(name='ping', description='Pong!')
-async def ping(interaction: discord.Interaction, message: str):
-    await interaction.response.send_message(f'Pong! {message}')
-    print(message)
-
-
+# define setup command using command tree
 @tree.command(name='setup', description='Setup the bot by selecting what channel you want it to talk in, and the '
                                         'temperature of the AI.')
+# set default permissions for setup command
 @app_commands.default_permissions(manage_webhooks=True)
+# function for setup command
 async def setup(interaction: discord.Interaction, channel: discord.TextChannel, temperature: float):
+    # send message with specified channel and temperature
     await interaction.response.send_message(f'Bot will now talk in {channel} with a temperature of {temperature}')
 
+    # update bot variables for Discord channel and temperature
     bot.chan = channel.id
     bot.temp = temperature
 
-    async def setup(interaction: discord.Interaction):
-        await interaction.response.send_message('You do not have permission to use this command')
-
-
+# define help command using command tree
 @tree.command(name='help', description='Help command')
+# function for help command
 async def help(interaction: discord.Interaction):
-    await interaction.response.send_message(f'Commands: /ping <message>, /setup <channel> <temperature>, /help')
+    # send message with list of commands
+    await interaction.response.send_message(f'Commands: \n/setup <channel> <temperature>, \n/help')
 
-# bot checks for message
+# event handler for when a message is received in the Discord server
 @bot.event
 async def on_message(message):
+    # store message content in prompt variable
     prompt = message.content
 
+    # return if the message was sent by the bot, starts with '!', or was not sent in the specified channel
     if message.author == bot.user:
         return
     if message.content.startswith('!'):
@@ -66,7 +66,7 @@ async def on_message(message):
         print('Not correct channel')
         return
 
-    # prompts the ai to generate a response
+    # generate response from OpenAI API
     completion = openai.Completion.create(
         model="text-davinci-003",
         prompt=prompt,
@@ -74,11 +74,11 @@ async def on_message(message):
         temperature=bot.temp
     )
 
-    # sends the response to the channel
+    # send response to Discord channel
     await message.channel.send(completion.choices[0].text)
+    # process commands in the message
     await bot.process_commands(message)
     print(completion)
 
-
-# run bot
+# run the bot using the Discord bot token
 bot.run(os.getenv('TOKEN'))
