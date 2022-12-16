@@ -4,6 +4,7 @@ import openai
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
+from discord import app_commands
 
 load_dotenv()
 
@@ -37,13 +38,13 @@ async def ping(interaction: discord.Interaction, message: str):
 
 @tree.command(name='setup', description='Setup the bot by selecting what channel you want it to talk in, and the '
                                         'temperature of the AI.')
+@app_commands.default_permissions(manage_webhooks=True)
 async def setup(interaction: discord.Interaction, channel: discord.TextChannel, temperature: float):
     await interaction.response.send_message(f'Bot will now talk in {channel} with a temperature of {temperature}')
 
     bot.chan = channel.id
     bot.temp = temperature
 
-else:
     async def setup(interaction: discord.Interaction):
         await interaction.response.send_message('You do not have permission to use this command')
 
