@@ -14,6 +14,10 @@ openai.api_key = os.getenv('KEY')
 # discord setup
 bot = commands.Bot(command_prefix='./', intents=discord.Intents.all(), help_command=None)
 
+# variable setup
+bot.chan = 'str'
+bot.temp = 0.5
+
 
 @bot.event
 async def on_ready():
@@ -33,11 +37,12 @@ async def ping(interaction: discord.Interaction, message: str):
 
 @tree.command(name='setup', description='Setup the bot by selecting what channel you want it to talk in, and the '
                                         'temperature of the AI.')
-async def setup(interaction: discord.Interaction, channel: str, temperature: int):
+async def setup(interaction: discord.Interaction, channel: discord.TextChannel, temperature: float):
     await interaction.response.send_message(f'Bot will now talk in {channel} with a temperature of {temperature}')
 
-    chan = channel
-    temp = temperature
+    bot.chan = channel.id
+    bot.temp = temperature
+
 
 @tree.command(name='help', description='Help command')
 async def help(interaction: discord.Interaction):
@@ -45,8 +50,11 @@ async def help(interaction: discord.Interaction):
 
 # bot checks for message
 @bot.event
-async def on_message(message, temp, chan):
+async def on_message(message):
     prompt = message.content
+
+    print(bot.chan)
+    print(bot.temp)
 
     if message.author == bot.user:
         return
@@ -55,22 +63,20 @@ async def on_message(message, temp, chan):
         return
     if message.content.startswith('!'):
         return
-    if message.channel.name == chan:
-
-        # prompts the ai to generate a response
-        completion = openai.Completion.create(
-            model="text-davinci-003",
-            prompt=prompt,
-            max_tokens=50,
-            temperature=temp,
-        )
-
-        # sends the response to the channel
-        await message.channel.send(completion.choices[0].text)
-        await bot.process_commands(message)
-
-    else:
+    if message.channel.name != bot.chan:
         return
+
+    # prompts the ai to generate a response
+    completion = openai.Completion.create(
+        model="text-davinci-003",
+        prompt=prompt,
+        max_tokens=50,
+        temperature=bot.temp
+    )
+
+    # sends the response to the channel
+    await message.channel.send(completion.choices[0].text)
+    await bot.process_commands(message)
 
 
 # run bot
