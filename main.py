@@ -5,6 +5,7 @@ import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 from discord import app_commands
+import sqlite3
 
 # load environment variables from .env file
 load_dotenv()
@@ -37,19 +38,26 @@ tree = bot.tree
 @app_commands.default_permissions(manage_webhooks=True)
 # function for setup command
 async def setup(interaction: discord.Interaction, channel: discord.TextChannel, temperature: float):
-    # send message with specified channel and temperature
-    await interaction.response.send_message(f'Bot will now talk in {channel} with a temperature of {temperature}')
 
-    # update bot variables for Discord channel and temperature
-    bot.chan = channel.id
-    bot.temp = temperature
+    # check the temperature is between 0 and 2
+    if 0 <= temperature <= 2:
+        # send message with specified channel and temperature
+        await interaction.response.send_message(f'Bot will now talk in {channel} with a temperature of {temperature}')
+
+        # update bot variables for Discord channel and temperature
+        bot.chan = channel.id
+        bot.temp = temperature
+
+    else:
+        # send error message
+        await interaction.response.send_message('Temperature must be between 0 and 2')
 
 # define help command using command tree
 @tree.command(name='help', description='Help command')
 # function for help command
 async def help(interaction: discord.Interaction):
     # send message with list of commands
-    await interaction.response.send_message(f'Commands: \n/setup <channel> <temperature>, \n/help')
+    await interaction.response.send_message('Commands:\n/setup <channel> <temperature>,\n/help')
 
 # event handler for when a message is received in the Discord server
 @bot.event
