@@ -17,10 +17,6 @@ openai.api_key = os.getenv('KEY')
 # initialize Discord bot with command prefix, intents, and help command
 bot = commands.Bot(command_prefix='./', intents=discord.Intents.all(), help_command=None)
 
-# initialize bot variables for Discord channel and temperature
-bot.chan = 'str'
-bot.temp = 0.5
-
 # event handler for when the bot is ready
 @bot.event
 async def on_ready():
@@ -44,9 +40,16 @@ async def setup(interaction: discord.Interaction, channel: discord.TextChannel, 
         # send message with specified channel and temperature
         await interaction.response.send_message(f'Bot will now talk in {channel} with a temperature of {temperature}')
 
-        # update bot variables for Discord channel and temperature
-        bot.chan = channel.id
-        bot.temp = temperature
+        # connect to database
+        db = sqlite3.connect('main.sqlite')
+        cursor = db.cursor()
+
+        # check if the server already has a row in the database
+
+        # if the server already has a row in the database
+
+        # if the server does not have a row in the database
+        cursor.execute(f'INSERT INTO main VALUES ({interaction.guild.id}, {channel.id}, {temperature})')
 
     else:
         # send error message
